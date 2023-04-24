@@ -1,0 +1,13 @@
+version: '3'
+services:
+  go:
+    build:
+      context: .
+      dockerfile: ./docker/golang/Dockerfile
+    container_name: go_container
+    ports:
+      - "8701:8000"
+    tty: true
+    volumes:
+      - ./go-app:/app/go
+    command: ["sh", "-c", "air"]

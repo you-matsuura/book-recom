@@ -1,0 +1,12 @@
+[build]
+  cmd = "go build -o ./tmp/main ."
+  bin = "tmp/main"
+  delay = 1000ms
+
+[watch]
+  includes = ["."]
+  excludes = ["tmp"]
+
+[logger]
+  level = "info"
+  output = "air.log"
