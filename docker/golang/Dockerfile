@@ -1,3 +1,5 @@
+# 開発環境用
+
 FROM golang:1.20.3-alpine
 
 RUN apk update
