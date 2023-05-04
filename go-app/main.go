@@ -5,12 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"book-recom/models"
 )
 
 func main() {
+
+	db := models.ConnectDB()
+
+	models.GetData(db)
+
 	http.HandleFunc("/", handleRequest)
 	http.ListenAndServe(":8000", nil)
 }
+
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
 	// 共通処理

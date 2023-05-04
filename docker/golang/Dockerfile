@@ -2,13 +2,17 @@
 
 FROM golang:1.20.3-alpine
 
+ENV GOPATH /go
+
 RUN apk update
 RUN apk add alpine-sdk
 
-WORKDIR /app/go
+WORKDIR /go/src
 
 # ホストマシンからソースコードをコピー
 COPY ./go-app .
+
+# WORKDIR /go
 
 # go.modからmodをダウンロードする
 RUN go mod download

@@ -1,13 +1,41 @@
 version: '3'
 services:
-  go:
+  web:
     build:
       context: .
       dockerfile: ./docker/golang/Dockerfile
-    container_name: go_container
     ports:
       - "8701:8000"
     tty: true
     volumes:
-      - ./go-app:/app/go
+      - ./go-app:/go/src
     command: ["sh", "-c", "air"]
+    networks:
+      - book-recom
+  db:
+    image: mysql:8.0.33
+    tty: true
+    # platform: linux/amd64
+    ports:
+      - 3306:3306
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: book_recom
+        TZ: Asia/Tokyo
+    volumes:
+      - type: volume
+        source: mysql_test_volume
+        target: /var/lib/mysql
+      # - type: bind
+      #   source: ./mysql/init
+      #   target: /docker-entrypoint-initdb.d
+    networks:
+      - book-recom
+
+volumes:
+  mysql_test_volume:
+    name: mysql_test_volume
+
+networks:
+  book-recom:
+    external: true
