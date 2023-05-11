@@ -50,13 +50,14 @@ func ConnectDB() *sql.DB {
 	return db
 }
 
+// 
+type User struct {
+	Id int
+	UserName string
+}
 
-func GetData(db *sql.DB) {
-	// 
-	type User struct {
-		Id int
-		UserName string
-	}
+func GetUsers(db *sql.DB) (users []*User) {
+
 
 	defer db.Close()
 
@@ -75,8 +76,6 @@ func GetData(db *sql.DB) {
 
 	for rows.Next() {
 
-		// var user User
-
 		user := &User{}
 
 		err := rows.Scan(&user.Id, &user.UserName)
@@ -84,6 +83,9 @@ func GetData(db *sql.DB) {
 		if err != nil {
 			panic(err.Error())
 		}
-		fmt.Println(user.Id, user.UserName)
+
+		users = append(users, user)
 	}
+
+	return users
 } 

@@ -1,87 +1,75 @@
 package main
 
 import (
-	"io"
-	"encoding/json"
+	// "io"
+	// "encoding/json"
 	"fmt"
 	"net/http"
 	"book-recom/models"
+
+	// "errors"
+	"github.com/gin-gonic/gin"
 )
 
-func main() {
+type book struct {
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Author   string `json:"author"`
+	Quantity int    `json:"quantity"`
+}
 
-	db := models.ConnectDB()
+var books = []book{
+	{ID: "1", Title: "In Search of Lost Time", Author: "Marcel Proust", Quantity: 2},
+	{ID: "2", Title: "The Great Gatsby", Author: "F. Scott Fitzgerald", Quantity: 5},
+	{ID: "3", Title: "War and Peace", Author: "Leo Tolstoy", Quantity: 6},
+}
 
-	models.GetData(db)
-
-	http.HandleFunc("/", handleRequest)
-	http.ListenAndServe(":8000", nil)
+func getBooks(c *gin.Context) {
+	// クエリパラメータ取得
+	// ex) domain.jp/index?q=xxx
+	queryParam := c.Query("q") 
+	fmt.Println("=========クエリパラメータ取得", queryParam)
+	c.IndentedJSON(http.StatusOK, queryParam)
 }
 
 
-func handleRequest(w http.ResponseWriter, r *http.Request) {
-	// 共通処理
-	fmt.Println("Common process")
 
-	// URLに応じたハンドラを実行
-	switch r.URL.Path {
-	case "/xxx":
-		handleXxx(w, r)
-	default:
-		http.NotFound(w, r)
-	}
-}
+func getCars(c *gin.Context) {
 
-
-
-func handleXxx(w http.ResponseWriter, r *http.Request) {
 	// inputDataの構造体を用意
 	type requestParam struct {
-		Text string `json:"text"`
-		Id int `json:"id"`
+		Text string `json:"text" binding:"required"`
+		Id int `json:"id" binding:"required"`
 	}
 
-	inputData := &requestParam{}
-
-	// ポインタ型で渡すこと
-	err := ConstructInputData(r, inputData)
-
-	fmt.Println(inputData.Text, inputData.Id)
-
-	data := map[string]string{
-		"message": "Hello, JSON!",
+	var json requestParam
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	
-	// jsonに変換する
-	res, err := json.Marshal(data)
+	// フォームパラメータ取得
+	formParam := c.PostForm("form") 
+	fmt.Println("=========フォームパラメータ取得", formParam)
+	c.JSON(http.StatusOK, gin.H{"ID": json.Id, "テキスト": json.Text})
+}
 
+func getUsers(c *gin.Context) {
+	db := models.ConnectDB()
 
-	if err != nil {
-		fmt.Fprintf(w, "Error: %v", err)
-	}
-
-	// レスポンスを返却する
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+	users := models.GetUsers(db)
+	c.JSON(http.StatusOK, gin.H{"users": users})
 }
 
 
+func main() {
+	router := gin.Default()
 
-func ConstructInputData[T any](r *http.Request, inputData T) error {
-	// リクエストを読み込む。
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
-	defer r.Body.Close()
+	router.GET("/books", getBooks)
 
-	// リクエストを引数に受け取った構造体にマッピングする
-	err = json.Unmarshal(body, inputData)
-	if err != nil {
-		return err
-	}
+	router.GET("/users", getUsers)
 
-	return nil
+	router.POST("/cars", getCars)
+
+	router.Run(":8000")
 }
