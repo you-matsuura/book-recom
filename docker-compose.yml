@@ -6,6 +6,9 @@ services:
       dockerfile: ./docker/golang/Dockerfile
     ports:
       - "8701:8000"
+    depends_on:
+      - db
+      - redis
     tty: true
     volumes:
       - ./go-app:/go/src
@@ -29,6 +32,12 @@ services:
       # - type: bind
       #   source: ./mysql/init
       #   target: /docker-entrypoint-initdb.d
+    networks:
+      - book-recom
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
     networks:
       - book-recom
 

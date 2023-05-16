@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"book-recom/models"
 
+	controller "book-recom/controllers"
+
 	// "errors"
 	"github.com/gin-gonic/gin"
 )
@@ -70,6 +72,11 @@ func main() {
 	router.GET("/users", getUsers)
 
 	router.POST("/cars", getCars)
+
+
+	router.POST("/signup", controller.PostSignUp)
+	router.POST("/getSession", controller.GetSession)
+
 
 	router.Run(":8000")
 }
