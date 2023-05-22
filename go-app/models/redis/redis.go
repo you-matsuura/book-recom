@@ -41,7 +41,7 @@ func NewSession(c *gin.Context, cookieKey, redisValue string) {
 
 func GetSession(c *gin.Context, cookieKey string) interface{} {
 	redisKey, _ := c.Cookie(cookieKey)
-	redisKey := cookieKey
+	// redisKey := cookieKey
 	redisValue, err := conn.Get(c, redisKey).Result()
 	switch {
 	case err == redis.Nil:

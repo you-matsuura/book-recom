@@ -3,14 +3,16 @@ package main
 import (
 	// "io"
 	// "encoding/json"
+	"book-recom/models"
+	"errors"
 	"fmt"
 	"net/http"
-	"book-recom/models"
 
 	controller "book-recom/controllers"
 
 	// "errors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type book struct {
@@ -29,19 +31,17 @@ var books = []book{
 func getBooks(c *gin.Context) {
 	// クエリパラメータ取得
 	// ex) domain.jp/index?q=xxx
-	queryParam := c.Query("q") 
+	queryParam := c.Query("q")
 	fmt.Println("=========クエリパラメータ取得", queryParam)
 	c.IndentedJSON(http.StatusOK, queryParam)
 }
-
-
 
 func getCars(c *gin.Context) {
 
 	// inputDataの構造体を用意
 	type requestParam struct {
 		Text string `json:"text" binding:"required"`
-		Id int `json:"id" binding:"required"`
+		Id   int    `json:"id" binding:"required"`
 	}
 
 	var json requestParam
@@ -51,20 +51,36 @@ func getCars(c *gin.Context) {
 	}
 
 	// フォームパラメータ取得
-	formParam := c.PostForm("form") 
+	formParam := c.PostForm("form")
 	fmt.Println("=========フォームパラメータ取得", formParam)
 	c.JSON(http.StatusOK, gin.H{"ID": json.Id, "テキスト": json.Text})
 }
 
 func getUsers(c *gin.Context) {
-	db := models.ConnectDB()
+	type User struct {
+		Id    int    `gorm:"column:msu_user_id"`
+		Email string `gorm:"column:msu_email"`
+	}
 
-	users := models.GetUsers(db)
+	db := models.NewSQLHandler()
+	users := []User{}
+
+	rows := db.DB.Table("mst_user").Select("msu_user_id", "msu_email").Find(&users)
+
+	// check error ErrRecordNotFound
+	if errors.Is(rows.Error, gorm.ErrRecordNotFound) {
+		fmt.Println("データベース接続失敗")
+		// log.Fatal(rows.Error)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"users": users})
 }
 
-
 func main() {
+
+	models.DBOpen()
+	defer models.DBClose()
+
 	router := gin.Default()
 
 	router.GET("/books", getBooks)
@@ -73,10 +89,8 @@ func main() {
 
 	router.POST("/cars", getCars)
 
-
 	router.POST("/signup", controller.PostSignUp)
 	router.POST("/getSession", controller.GetSession)
-
 
 	router.Run(":8000")
 }
