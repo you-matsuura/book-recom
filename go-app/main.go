@@ -89,8 +89,9 @@ func main() {
 
 	router.POST("/cars", getCars)
 
-	router.POST("/signup", controller.PostSignUp)
-	router.POST("/getSession", controller.GetSession)
+	router.POST("/signup", controller.SignUp)
+	router.POST("/login", controller.Login)
+	// router.POST("/getSession", controller.GetSession)
 
 	router.Run(":8000")
 }

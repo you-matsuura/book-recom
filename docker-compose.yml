@@ -29,9 +29,10 @@ services:
       - type: volume
         source: mysql_test_volume
         target: /var/lib/mysql
-      # - type: bind
-      #   source: ./mysql/init
-      #   target: /docker-entrypoint-initdb.d
+      - type: bind
+        source: ./mysql/initdb
+        target: /docker-entrypoint-initdb.d
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --innodb-flush-log-at-trx-commit=0 --innodb-ft-enable-stopword=0
     networks:
       - book-recom
   redis:

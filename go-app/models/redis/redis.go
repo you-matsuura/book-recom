@@ -20,6 +20,8 @@ func init() {
 	})
 }
 
+// セッションを新しく作成する
+// - cookieKey: "session_id"
 func NewSession(c *gin.Context, cookieKey, redisValue string) {
 	b := make([]byte, 64)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {
@@ -27,11 +29,13 @@ func NewSession(c *gin.Context, cookieKey, redisValue string) {
 	}
 	newRedisKey := base64.URLEncoding.EncodeToString(b)
 
+	// redisにデータを保存する
 	// 4: 有効期限を示している。0は永久
 	if err := conn.Set(c, newRedisKey, redisValue, 0).Err(); err != nil {
 		panic("Session登録時にエラーが発生：" + err.Error())
 	}
 
+	// クッキーにredisのキーを保存している
 	// 3: 有効期限を示している。0はセッションクッキー
 	// 4: 有効パスを設定する
 	// 5: 有効ドメインを設定する
